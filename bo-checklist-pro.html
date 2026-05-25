@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B.O. — Checklist Diário</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --preto: #080808;
+  --carvao: #111111;
+  --grafite: #1a1a1a;
+  --dourado: #D4A017;
+  --dourado-vivo: #F0BC2E;
+  --branco: #F2EDE4;
+  --cinza: #7a7a7a;
+  --verde: #27ae60;
+  --verde-wpp: #25D366;
+  --vermelho: #e74c3c;
+  --azul: #2980b9;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--preto); color: var(--branco); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+/* TOPO */
+.topo { background: var(--dourado); color: var(--preto); text-align: center; padding: 10px 16px; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 12px; }
+.topo-admin-btn { background: var(--preto); color: var(--dourado); border: none; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; cursor: pointer; margin-left: auto; }
+
+/* TELAS */
+.tela { display: none; }
+.tela.ativa { display: block; }
+
+/* ── LOGIN ── */
+.login-wrap { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 24px; background: var(--preto); }
+.login-box { width: 100%; max-width: 400px; }
+.login-marca { font-family: 'Anton', sans-serif; font-size: 2.8rem; text-transform: uppercase; line-height: 0.95; margin-bottom: 8px; color: var(--branco); }
+.login-marca span { color: var(--dourado); display: block; }
+.login-descr { font-size: 0.85rem; color: var(--cinza); margin-bottom: 36px; line-height: 1.6; }
+.campo-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dourado); margin-bottom: 8px; display: block; }
+.campo-input { width: 100%; background: var(--carvao); border: 1px solid rgba(212,160,23,0.25); color: var(--branco); font-family: 'Barlow', sans-serif; font-size: 1rem; padding: 14px 16px; margin-bottom: 20px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; border-radius: 0; }
+.campo-input:focus { border-color: var(--dourado); }
+.campo-input::placeholder { color: var(--cinza); }
+.grade { display: grid; gap: 2px; margin-bottom: 20px; }
+.grade-3 { grid-template-columns: 1fr 1fr 1fr; }
+.grade-btn { background: var(--carvao); border: 2px solid transparent; color: var(--cinza); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 16px 8px; cursor: pointer; text-align: center; transition: all 0.2s; line-height: 1.3; }
+.grade-btn:hover { color: var(--branco); }
+.grade-btn.sel { border-color: var(--dourado); color: var(--dourado); background: rgba(212,160,23,0.08); }
+.grade-btn .grade-icone { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+.btn-principal { width: 100%; background: var(--dourado); color: var(--preto); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.1rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 16px; border: none; cursor: pointer; transition: background 0.2s; }
+.btn-principal:hover { background: var(--dourado-vivo); }
+.erro { color: var(--vermelho); font-size: 0.82rem; margin-top: 10px; display: none; }
+
+/* ── APP CHECKLIST ── */
+.app-header { background: var(--carvao); padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; z-index: 99; }
+.app-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.app-perfil { display: flex; align-items: center; gap: 10px; }
+.app-badge { background: var(--dourado); color: var(--preto); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; }
+.app-nome { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.05rem; text-transform: uppercase; color: var(--branco); }
+.app-sair { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--cinza); font-size: 0.72rem; padding: 6px 12px; cursor: pointer; }
+.app-data { font-size: 0.72rem; color: var(--cinza); margin-bottom: 6px; }
+.prog-barra { height: 4px; background: var(--grafite); border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(to right, var(--dourado), var(--dourado-vivo)); transition: width 0.4s; width: 0%; border-radius: 2px; }
+.prog-txt { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--cinza); margin-top: 5px; }
+.prog-txt strong { color: var(--dourado); }
+.app-body { padding: 20px 16px 32px; max-width: 600px; margin: 0 auto; }
+
+/* BLOCOS */
+.bloco-turno { margin-bottom: 32px; }
+.bloco-turno-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; margin-bottom: 2px; border-left: 4px solid var(--dourado); background: var(--grafite); }
+.bloco-turno-icone { font-size: 1.2rem; }
+.bloco-turno-titulo { font-family: 'Anton', sans-serif; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--branco); }
+.bloco-turno-count { margin-left: auto; font-size: 0.72rem; color: var(--cinza); }
+
+/* ITENS */
+.item { display: flex; align-items: flex-start; gap: 12px; background: var(--carvao); padding: 13px 14px; margin-bottom: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background 0.15s; }
+.item:active { background: var(--grafite); }
+.item.ok { background: rgba(39,174,96,0.07); }
+.item-box { width: 22px; height: 22px; border: 2px solid rgba(212,160,23,0.35); border-radius: 3px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.item.ok .item-box { background: var(--verde); border-color: var(--verde); }
+.chk { display: none; color: white; font-size: 0.85rem; font-weight: 900; }
+.item.ok .chk { display: block; }
+.item-txt strong { font-size: 0.9rem; font-weight: 700; color: var(--branco); display: block; line-height: 1.3; }
+.item.ok .item-txt strong { color: var(--cinza); text-decoration: line-through; }
+.item-txt span { font-size: 0.75rem; color: var(--cinza); line-height: 1.4; margin-top: 2px; display: block; }
+
+.alerta { background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.25); color: #e74c3c; padding: 12px 14px; font-size: 0.83rem; line-height: 1.5; margin-bottom: 16px; display: none; }
+.btn-enviar { width: 100%; background: var(--verde-wpp); color: white; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.1rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 18px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: opacity 0.2s; }
+.btn-enviar.off { background: var(--grafite); color: var(--cinza); cursor: not-allowed; }
+.btn-hint { text-align: center; font-size: 0.75rem; margin-top: 8px; color: var(--cinza); }
+
+.concluido { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 24px; }
+.concluido-i { font-size: 4rem; margin-bottom: 20px; }
+.concluido h2 { font-family: 'Anton', sans-serif; font-size: 2.8rem; text-transform: uppercase; margin-bottom: 12px; }
+.concluido h2 span { color: var(--verde); }
+.concluido p { font-size: 0.92rem; color: var(--cinza); line-height: 1.7; max-width: 300px; margin-bottom: 32px; }
+.btn-novo { background: var(--dourado); color: var(--preto); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 32px; border: none; cursor: pointer; }
+
+/* ══ ADMIN ══ */
+.admin-wrap { min-height: 100vh; padding: 0 0 60px; background: var(--preto); }
+.admin-header { background: var(--carvao); padding: 20px 24px; border-bottom: 2px solid var(--dourado); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 99; }
+.admin-titulo { font-family: 'Anton', sans-serif; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.admin-titulo span { color: var(--dourado); }
+.admin-sair { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--cinza); font-size: 0.75rem; padding: 8px 16px; cursor: pointer; }
+
+.admin-body { max-width: 800px; margin: 0 auto; padding: 28px 20px; }
+
+/* CONFIG GERAL */
+.admin-secao { margin-bottom: 40px; }
+.admin-secao-titulo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dourado); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.admin-secao-titulo::after { content: ''; flex: 1; height: 1px; background: rgba(212,160,23,0.2); }
+
+.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:500px){ .config-grid { grid-template-columns: 1fr; } }
+.config-campo { display: flex; flex-direction: column; gap: 6px; }
+.config-campo label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cinza); }
+.config-campo input { background: var(--carvao); border: 1px solid rgba(255,255,255,0.08); color: var(--branco); font-family: 'Barlow', sans-serif; font-size: 0.9rem; padding: 11px 14px; outline: none; transition: border-color 0.2s; border-radius: 0; -webkit-appearance: none; }
+.config-campo input:focus { border-color: var(--dourado); }
+.btn-salvar-config { margin-top: 16px; background: var(--dourado); color: var(--preto); font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 0.9rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 28px; border: none; cursor: pointer; }
+
+/* TABS ADMIN */
+.admin-tabs { display: flex; gap: 2px; margin-bottom: 20px; overflow-x: auto; }
+.admin-tab { background: var(--carvao); color: var(--cinza); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 18px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; }
+.admin-tab:hover { color: var(--branco); }
+.admin-tab.ativo { color: var(--dourado); border-bottom-color: var(--dourado); background: rgba(212,160,23,0.05); }
+
+/* LISTA EDITÁVEL */
+.edit-bloco { margin-bottom: 28px; }
+.edit-bloco-titulo { font-family: 'Anton', sans-serif; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--branco); padding: 10px 14px; background: var(--grafite); border-left: 4px solid var(--dourado); margin-bottom: 2px; }
+
+.edit-item { display: flex; align-items: center; gap: 10px; background: var(--carvao); padding: 10px 12px; margin-bottom: 2px; }
+.edit-item-textos { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.edit-input-titulo { background: var(--grafite); border: 1px solid rgba(255,255,255,0.06); color: var(--branco); font-family: 'Barlow', sans-serif; font-size: 0.88rem; font-weight: 700; padding: 7px 10px; outline: none; width: 100%; transition: border-color 0.2s; border-radius: 0; }
+.edit-input-titulo:focus { border-color: var(--dourado); }
+.edit-input-detalhe { background: var(--grafite); border: 1px solid rgba(255,255,255,0.04); color: var(--cinza); font-family: 'Barlow', sans-serif; font-size: 0.78rem; padding: 6px 10px; outline: none; width: 100%; transition: border-color 0.2s; border-radius: 0; }
+.edit-input-detalhe:focus { border-color: rgba(212,160,23,0.4); }
+.btn-remover { background: rgba(231,76,60,0.15); border: none; color: var(--vermelho); font-size: 1rem; width: 32px; height: 32px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.btn-remover:hover { background: rgba(231,76,60,0.3); }
+
+.btn-add-item { display: flex; align-items: center; gap: 8px; background: rgba(212,160,23,0.06); border: 1px dashed rgba(212,160,23,0.25); color: var(--dourado); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 11px 16px; cursor: pointer; width: 100%; margin-top: 2px; transition: background 0.2s; }
+.btn-add-item:hover { background: rgba(212,160,23,0.1); }
+
+.btn-salvar-lista { width: 100%; background: var(--verde); color: white; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px; border: none; cursor: pointer; margin-top: 20px; transition: opacity 0.2s; }
+.btn-salvar-lista:hover { opacity: 0.9; }
+
+.salvo-msg { text-align: center; font-size: 0.82rem; color: var(--verde); margin-top: 10px; display: none; }
+
+/* SENHA ADMIN */
+.senha-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 24px; background: var(--preto); }
+.senha-box { width: 100%; max-width: 360px; text-align: center; }
+.senha-icone { font-size: 3rem; margin-bottom: 20px; }
+.senha-titulo { font-family: 'Anton', sans-serif; font-size: 2rem; text-transform: uppercase; margin-bottom: 8px; }
+.senha-titulo span { color: var(--dourado); }
+.senha-sub { font-size: 0.85rem; color: var(--cinza); margin-bottom: 32px; }
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <span id="topo-nome">✂️ B.O. BARBEARIA ORGANIZADA</span>
+  <button class="topo-admin-btn" onclick="irAdmin()">⚙️ Admin</button>
+</div>
+
+<!-- ══ LOGIN FUNCIONÁRIO ══ -->
+<div class="tela ativa" id="tela-login">
+<div class="login-wrap">
+<div class="login-box">
+  <div class="login-marca">BARBEARIA<span id="login-nome-barbearia">ORGANIZADA</span></div>
+  <p class="login-descr">Digite seu nome e selecione sua função para ver o checklist do dia.</p>
+  <label class="campo-label">Seu nome</label>
+  <input class="campo-input" id="inp-nome" type="text" placeholder="Ex: João, Pedro, Lucas...">
+  <label class="campo-label">Sua função</label>
+  <div class="grade grade-3">
+    <div class="grade-btn" onclick="sel(this,'Barbeiro')"><span class="grade-icone">✂️</span>Barbeiro</div>
+    <div class="grade-btn" onclick="sel(this,'Recepção')"><span class="grade-icone">👋</span>Recepção</div>
+    <div class="grade-btn" onclick="sel(this,'Gerente')"><span class="grade-icone">📊</span>Gerente</div>
+  </div>
+  <button class="btn-principal" onclick="entrar()">VER MEU CHECKLIST →</button>
+  <div class="erro" id="login-erro">Preencha seu nome e selecione sua função.</div>
+</div>
+</div>
+</div>
+
+<!-- ══ CHECKLIST ══ -->
+<div class="tela" id="tela-app">
+  <div class="app-header">
+    <div class="app-header-row">
+      <div class="app-perfil">
+        <div class="app-badge" id="lbl-funcao">—</div>
+        <div class="app-nome" id="lbl-nome">—</div>
+      </div>
+      <button class="app-sair" onclick="sair()">← Sair</button>
+    </div>
+    <div class="app-data" id="lbl-data">—</div>
+    <div class="prog-barra"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-txt"><span id="prog-label">0 itens feitos</span><strong id="prog-pct">0%</strong></div>
+  </div>
+  <div class="app-body">
+    <div id="container-itens"></div>
+    <div class="alerta" id="alerta">⚠️ Ainda há itens pendentes. Verifique tudo antes de enviar.</div>
+    <button class="btn-enviar off" id="btn-enviar" onclick="enviar()">💬 ENVIAR RELATÓRIO NO WHATSAPP</button>
+    <div class="btn-hint" id="btn-hint">Complete todos os itens para liberar o envio</div>
+    <div class="concluido" id="concluido" style="display:none">
+      <div class="concluido-i">✅</div>
+      <h2>RELATÓRIO<br><span>ENVIADO!</span></h2>
+      <p>O dono já recebeu o resumo no WhatsApp. Bom trabalho!</p>
+      <button class="btn-novo" onclick="novoChecklist()">↺ Novo checklist</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SENHA ADMIN ══ -->
+<div class="tela" id="tela-senha">
+<div class="senha-wrap">
+<div class="senha-box">
+  <div class="senha-icone">🔐</div>
+  <div class="senha-titulo">ÁREA<br><span>ADMIN</span></div>
+  <p class="senha-sub">Digite a senha de administrador para acessar as configurações.</p>
+  <input class="campo-input" id="inp-senha" type="password" placeholder="Senha admin..." style="text-align:center;margin-bottom:16px;">
+  <button class="btn-principal" onclick="verificarSenha()">ENTRAR NO ADMIN →</button>
+  <div class="erro" id="senha-erro" style="display:none;text-align:center;">Senha incorreta.</div>
+  <br><br>
+  <button onclick="voltarLogin()" style="background:transparent;border:none;color:var(--cinza);font-size:0.82rem;cursor:pointer;text-decoration:underline;">← Voltar</button>
+</div>
+</div>
+</div>
+
+<!-- ══ PAINEL ADMIN ══ -->
+<div class="tela" id="tela-admin">
+<div class="admin-wrap">
+  <div class="admin-header">
+    <div class="admin-titulo">PAINEL <span>ADMIN</span></div>
+    <button class="admin-sair" onclick="sairAdmin()">← Sair do admin</button>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- CONFIGURAÇÕES GERAIS -->
+    <div class="admin-secao">
+      <div class="admin-secao-titulo">⚙️ Configurações gerais</div>
+      <div class="config-grid">
+        <div class="config-campo">
+          <label>Nome da Barbearia</label>
+          <input type="text" id="cfg-nome" placeholder="Ex: Barbearia do João">
+        </div>
+        <div class="config-campo">
+          <label>Número WhatsApp do Dono</label>
+          <input type="text" id="cfg-numero" placeholder="Ex: 5511999999999">
+        </div>
+        <div class="config-campo">
+          <label>Senha Admin (atual)</label>
+          <input type="password" id="cfg-senha-atual" placeholder="Senha atual">
+        </div>
+        <div class="config-campo">
+          <label>Nova Senha Admin</label>
+          <input type="password" id="cfg-senha-nova" placeholder="Deixe em branco para manter">
+        </div>
+      </div>
+      <button class="btn-salvar-config" onclick="salvarConfig()">💾 SALVAR CONFIGURAÇÕES</button>
+      <div class="salvo-msg" id="config-salvo">✅ Configurações salvas!</div>
+    </div>
+
+    <!-- EDITAR CHECKLISTS -->
+    <div class="admin-secao">
+      <div class="admin-secao-titulo">📋 Editar checklists</div>
+      <div class="admin-tabs">
+        <div class="admin-tab ativo" onclick="trocarTabAdmin(this,'Barbeiro')">✂️ Barbeiro</div>
+        <div class="admin-tab" onclick="trocarTabAdmin(this,'Recepção')">👋 Recepção</div>
+        <div class="admin-tab" onclick="trocarTabAdmin(this,'Gerente')">📊 Gerente</div>
+      </div>
+      <div id="edit-container"></div>
+      <button class="btn-salvar-lista" onclick="salvarLista()">💾 SALVAR CHECKLIST</button>
+      <div class="salvo-msg" id="lista-salvo">✅ Checklist salvo com sucesso!</div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+// ══ DADOS PADRÃO ══
+const LISTAS_PADRAO = {
+  Barbeiro: [
+    { turno: '🌅 Manhã', itens: [
+      { t: 'Higienizar todas as ferramentas', d: 'Máquinas, tesouras, pentes e navalhas desinfetadas antes do primeiro corte' },
+      { t: 'Limpar e organizar a bancada', d: 'Produtos alinhados, sem sujeira da véspera, espelho limpo' },
+      { t: 'Testar as máquinas', d: 'Verificar carga, lâminas e regulagem antes de atender' },
+      { t: 'Preparar capa e toalhas limpas', d: 'Separar para o primeiro atendimento — nunca reutilizar sem lavar' },
+    ]},
+    { turno: '☀️ Tarde', itens: [
+      { t: 'Cumprimentar cada cliente na cadeira', d: 'Nome, contato visual, perguntar o que quer antes de começar' },
+      { t: 'Consulta antes de cada corte', d: 'Confirmar comprimento, estilo e finalização com o cliente' },
+      { t: 'Limpar cadeira entre clientes', d: 'Retirar todo o cabelo da cadeira, capa e chão antes do próximo' },
+      { t: 'Bancada organizada o tempo todo', d: 'Produtos no lugar, ferramentas higienizadas após cada uso' },
+      { t: 'Trocar toalha a cada cliente', d: 'Nunca reutilizar toalha — passar para lavar após o uso' },
+      { t: 'Higienizar ferramentas entre cortes', d: 'Máquina limpa e desinfetada antes de usar no próximo cliente' },
+      { t: 'Limpar espelho após cada atendimento', d: 'Sem marca de produto ou respingo — cliente nota o detalhe' },
+    ]},
+    { turno: '🌙 Noite', itens: [
+      { t: 'Limpar e guardar todas as ferramentas', d: 'Máquinas desinfetadas, tesouras na capa, navalhas protegidas' },
+      { t: 'Organizar produtos na bancada', d: 'Tudo no lugar certo, tampas fechadas, sem desperdício' },
+      { t: 'Limpar espelho e bancada', d: 'Sem produto espalhado, sem marca de dedo — pronto para amanhã' },
+      { t: 'Colocar máquinas para carregar', d: 'Todas ligadas na tomada — nunca começar o dia sem carga' },
+      { t: 'Separar toalhas usadas para lavar', d: 'Não misturar toalhas sujas com as limpas' },
+    ]},
+  ],
+  Recepção: [
+    { turno: '🌅 Manhã', itens: [
+      { t: 'Varrer e limpar o piso de toda a barbearia', d: 'Nenhum fio de cabelo — ambiente limpo para o primeiro cliente' },
+      { t: 'Limpar o banheiro', d: 'Papel, sabonete, toalha — tudo reabastecido e limpo' },
+      { t: 'Organizar área de espera', d: 'Cadeiras alinhadas, ambiente convidativo antes de abrir' },
+      { t: 'Ligar som ambiente e ar-condicionado', d: 'Volume adequado, temperatura agradável antes de abrir' },
+      { t: 'Preparar café e água', d: 'Disponível para oferecer desde o primeiro cliente' },
+      { t: 'Confirmar agendamentos do dia', d: 'Ver horários no sistema e avisar os barbeiros' },
+    ]},
+    { turno: '☀️ Tarde', itens: [
+      { t: 'Receber e cumprimentar cada cliente', d: 'Pelo nome se possível — indicar espera ou direcionar ao barbeiro' },
+      { t: 'Avisar o cliente sobre o tempo de espera', d: 'Informar logo na entrada — nunca deixar sem informação' },
+      { t: 'Oferecer água ou café para quem espera', d: 'Padrão da casa — cliente confortável sempre volta' },
+      { t: 'Manter piso limpo durante o dia', d: 'Varrer sempre que acumular cabelo — a cada 2h no mínimo' },
+      { t: 'Manter banheiro em ordem', d: 'Verificar a cada 2h — papel, sabonete, lixo' },
+      { t: 'Confirmar agendamentos da tarde', d: 'Ligar ou mandar lembrete para quem tem horário' },
+    ]},
+    { turno: '🌙 Noite', itens: [
+      { t: 'Varrer e limpar o piso de toda a barbearia', d: 'Nenhum fio de cabelo — pronto para abrir amanhã' },
+      { t: 'Limpar e organizar área de espera', d: 'Cadeiras alinhadas, lixo esvaziado' },
+      { t: 'Limpar e reabastecer banheiro', d: 'Papel, sabonete, toalha — deixar pronto para amanhã' },
+      { t: 'Desligar som e ar-condicionado', d: 'Economiza energia e evita dano ao equipamento' },
+      { t: 'Jogar fora o lixo de toda a barbearia', d: 'Não deixar lixo acumulado para o dia seguinte' },
+    ]},
+  ],
+  Gerente: [
+    { turno: '🌅 Manhã', itens: [
+      { t: 'Abrir o caixa e conferir troco', d: 'Valor correto disponível, sistema de pagamento testado' },
+      { t: 'Verificar estoque de produtos', d: 'Gel, pomada, loção, shampoo, álcool — anotar o que está acabando' },
+      { t: 'Distribuir a agenda entre os barbeiros', d: 'Cada barbeiro sabe seus clientes e horários antes de começar' },
+      { t: 'Confirmar presença de toda a equipe', d: 'Se alguém faltou, reorganizar a agenda imediatamente' },
+      { t: 'Checar se a barbearia está pronta para abrir', d: 'Limpeza, ferramentas, produtos — tudo ok antes do primeiro cliente' },
+    ]},
+    { turno: '☀️ Tarde', itens: [
+      { t: 'Acompanhar andamento da agenda', d: 'Garantir que os horários estão sendo respeitados sem atraso' },
+      { t: 'Monitorar qualidade do atendimento', d: 'Padrão de abordagem, limpeza das cadeiras, postura da equipe' },
+      { t: 'Resolver imprevistos com clientes', d: 'Reclamações ou remarcações — agir rápido' },
+      { t: 'Verificar estoque no meio do dia', d: 'Anotar o que está acabando para não faltar no turno da noite' },
+      { t: 'Conferir caixa no meio do expediente', d: 'Sangria se necessário — manter controle do movimento' },
+    ]},
+    { turno: '🌙 Noite', itens: [
+      { t: 'Fechar o caixa e conferir os valores', d: 'Total de entradas, saídas, sangrias — divergência comunicar agora' },
+      { t: 'Registrar total de clientes atendidos', d: 'Número por barbeiro — dado importante para análise semanal' },
+      { t: 'Confirmar que equipe fez o checklist', d: 'Barbeiros e recepção enviaram o relatório antes de sair' },
+      { t: 'Fechar porta, cadeado e grade', d: 'Conferir duas vezes — última pessoa a sair é responsável' },
+      { t: 'Enviar resumo do dia ao dono', d: 'Clientes, faturamento, ocorrências e observações relevantes' },
+      { t: 'Registrar pendências para amanhã', d: 'Estoque baixo, manutenção necessária, recado para a equipe' },
+    ]},
+  ],
+};
+
+// ══ ESTADO ══
+let funcao = '', nome = '', estadoItens = {};
+let adminFuncaoAtual = 'Barbeiro';
+
+function carregar(chave, padrao) {
+  try { const v = localStorage.getItem(chave); return v ? JSON.parse(v) : padrao; } catch { return padrao; }
+}
+function salvar(chave, val) { try { localStorage.setItem(chave, JSON.stringify(val)); } catch {} }
+
+function getListas() { return carregar('bo_listas', LISTAS_PADRAO); }
+function getConfig() { return carregar('bo_config', { nome: 'Barbearia Organizada', numero: '5535992611853', senha: 'admin123' }); }
+
+function atualizarTopoNome() {
+  const cfg = getConfig();
+  document.getElementById('topo-nome').textContent = '✂️ ' + cfg.nome.toUpperCase();
+  document.getElementById('login-nome-barbearia').textContent = cfg.nome.toUpperCase();
+}
+
+// ══ LOGIN ══
+function sel(el, val) {
+  document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  funcao = val;
+}
+
+function entrar() {
+  nome = document.getElementById('inp-nome').value.trim();
+  const erro = document.getElementById('login-erro');
+  if (!nome || !funcao) { erro.style.display = 'block'; return; }
+  erro.style.display = 'none';
+  iniciarChecklist();
+}
+
+function sair() {
+  ir('tela-login');
+  funcao = ''; nome = '';
+  document.getElementById('inp-nome').value = '';
+  document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('sel'));
+}
+
+// ══ CHECKLIST ══
+function iniciarChecklist() {
+  ir('tela-app');
+  document.getElementById('lbl-nome').textContent = nome;
+  document.getElementById('lbl-funcao').textContent = funcao;
+  const d = new Date();
+  const dias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  document.getElementById('lbl-data').textContent = dias[d.getDay()] + ', ' + d.toLocaleDateString('pt-BR');
+
+  const listas = getListas();
+  const blocos = listas[funcao];
+  const container = document.getElementById('container-itens');
+  container.innerHTML = '';
+  estadoItens = {};
+  let idx = 0;
+
+  blocos.forEach((bloco, bi) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'bloco-turno';
+    const countId = 'count-' + bi;
+    wrap.innerHTML = `<div class="bloco-turno-header">
+      <span class="bloco-turno-icone">${bloco.turno.split(' ')[0]}</span>
+      <span class="bloco-turno-titulo">${bloco.turno.split(' ').slice(1).join(' ')}</span>
+      <span class="bloco-turno-count" id="${countId}">0/${bloco.itens.length}</span>
+    </div>`;
+
+    bloco.itens.forEach(item => {
+      const id = 'item-' + idx;
+      estadoItens[id] = false;
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.dataset.id = id;
+      el.dataset.bloco = countId;
+      el.dataset.total = bloco.itens.length;
+      el.onclick = () => marcar(el);
+      el.innerHTML = `<div class="item-box"><span class="chk">✓</span></div>
+        <div class="item-txt"><strong>${item.t}</strong><span>${item.d}</span></div>`;
+      wrap.appendChild(el);
+      idx++;
+    });
+    container.appendChild(wrap);
+  });
+
+  document.getElementById('concluido').style.display = 'none';
+  container.style.display = 'block';
+  document.getElementById('btn-enviar').style.display = 'flex';
+  document.getElementById('btn-hint').style.display = 'block';
+  document.getElementById('alerta').style.display = 'none';
+  atualizarProg();
+}
+
+function marcar(el) {
+  const id = el.dataset.id;
+  estadoItens[id] = !estadoItens[id];
+  el.classList.toggle('ok', estadoItens[id]);
+  const blocoId = el.dataset.bloco;
+  const todos = document.querySelectorAll(`[data-bloco="${blocoId}"]`);
+  const feitos = Array.from(todos).filter(e => e.classList.contains('ok')).length;
+  const countEl = document.getElementById(blocoId);
+  if (countEl) countEl.textContent = `${feitos}/${el.dataset.total}`;
+  atualizarProg();
+}
+
+function atualizarProg() {
+  const ids = Object.keys(estadoItens);
+  const total = ids.length;
+  const feitos = ids.filter(k => estadoItens[k]).length;
+  const pct = total ? Math.round(feitos / total * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `${feitos} de ${total} itens feitos`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  const btn = document.getElementById('btn-enviar');
+  const hint = document.getElementById('btn-hint');
+  if (feitos === total && total > 0) {
+    btn.classList.remove('off');
+    hint.textContent = '✅ Tudo certo! Envie o relatório para o dono.';
+    hint.style.color = 'var(--verde)';
+  } else {
+    btn.classList.add('off');
+    const falt = total - feitos;
+    hint.textContent = `${falt} ${falt === 1 ? 'item faltando' : 'itens faltando'}`;
+    hint.style.color = 'var(--cinza)';
+  }
+}
+
+function enviar() {
+  if (document.getElementById('btn-enviar').classList.contains('off')) {
+    document.getElementById('alerta').style.display = 'block'; return;
+  }
+  const cfg = getConfig();
+  const listas = getListas();
+  const d = new Date();
+  const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const icF = { Barbeiro: '✂️', Recepção: '👋', Gerente: '📊' };
+  const total = Object.keys(estadoItens).length;
+  const feitos = Object.values(estadoItens).filter(Boolean).length;
+  let msg = `${icF[funcao]} *CHECKLIST — ${cfg.nome.toUpperCase()}*\n\n`;
+  msg += `👤 *Nome:* ${nome}\n📅 *Data:* ${d.toLocaleDateString('pt-BR')} às ${hora}\n✅ *Itens:* ${feitos}/${total}\n\n`;
+  let idx = 0;
+  listas[funcao].forEach(bloco => {
+    msg += `*${bloco.turno}*\n`;
+    bloco.itens.forEach(item => { msg += `${estadoItens['item-'+idx] ? '✅' : '❌'} ${item.t}\n`; idx++; });
+    msg += '\n';
+  });
+  msg += `_Enviado via B.O. Barbearia Organizada_`;
+  window.open(`https://wa.me/${cfg.numero}?text=${encodeURIComponent(msg)}`, '_blank');
+  setTimeout(() => {
+    document.getElementById('container-itens').style.display = 'none';
+    document.getElementById('btn-enviar').style.display = 'none';
+    document.getElementById('btn-hint').style.display = 'none';
+    document.getElementById('alerta').style.display = 'none';
+    document.getElementById('concluido').style.display = 'flex';
+  }, 400);
+}
+
+function novoChecklist() { document.getElementById('concluido').style.display = 'none'; sair(); }
+
+// ══ ADMIN ══
+function irAdmin() { ir('tela-senha'); document.getElementById('inp-senha').value = ''; document.getElementById('senha-erro').style.display = 'none'; }
+
+function verificarSenha() {
+  const cfg = getConfig();
+  const senha = document.getElementById('inp-senha').value;
+  if (senha === cfg.senha) {
+    ir('tela-admin');
+    carregarConfig();
+    renderizarEditor('Barbeiro');
+  } else {
+    document.getElementById('senha-erro').style.display = 'block';
+  }
+}
+
+function sairAdmin() { ir('tela-login'); }
+function voltarLogin() { ir('tela-login'); }
+
+function carregarConfig() {
+  const cfg = getConfig();
+  document.getElementById('cfg-nome').value = cfg.nome;
+  document.getElementById('cfg-numero').value = cfg.numero;
+}
+
+function salvarConfig() {
+  const cfg = getConfig();
+  const nomeVal = document.getElementById('cfg-nome').value.trim();
+  const numVal = document.getElementById('cfg-numero').value.trim();
+  const senhaAtual = document.getElementById('cfg-senha-atual').value;
+  const senhaNova = document.getElementById('cfg-senha-nova').value;
+  if (!nomeVal || !numVal) return;
+  cfg.nome = nomeVal;
+  cfg.numero = numVal;
+  if (senhaNova && senhaAtual === cfg.senha) cfg.senha = senhaNova;
+  salvar('bo_config', cfg);
+  atualizarTopoNome();
+  const msg = document.getElementById('config-salvo');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 2500);
+}
+
+function trocarTabAdmin(el, funcaoNome) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('ativo'));
+  el.classList.add('ativo');
+  adminFuncaoAtual = funcaoNome;
+  renderizarEditor(funcaoNome);
+}
+
+function renderizarEditor(funcaoNome) {
+  const listas = getListas();
+  const blocos = listas[funcaoNome];
+  const container = document.getElementById('edit-container');
+  container.innerHTML = '';
+
+  blocos.forEach((bloco, bi) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'edit-bloco';
+    wrap.dataset.bloco = bi;
+
+    const cab = document.createElement('div');
+    cab.className = 'edit-bloco-titulo';
+    cab.textContent = bloco.turno;
+    wrap.appendChild(cab);
+
+    bloco.itens.forEach((item, ii) => {
+      wrap.appendChild(criarEditItem(bi, ii, item.t, item.d));
+    });
+
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'btn-add-item';
+    btnAdd.dataset.bloco = bi;
+    btnAdd.innerHTML = '+ Adicionar item';
+    btnAdd.onclick = () => adicionarItem(bi);
+    wrap.appendChild(btnAdd);
+
+    container.appendChild(wrap);
+  });
+}
+
+function criarEditItem(bi, ii, titulo, detalhe) {
+  const el = document.createElement('div');
+  el.className = 'edit-item';
+  el.dataset.bloco = bi;
+  el.dataset.item = ii;
+  el.innerHTML = `
+    <div class="edit-item-textos">
+      <input class="edit-input-titulo" type="text" placeholder="Nome do item" value="${titulo.replace(/"/g,'&quot;')}">
+      <input class="edit-input-detalhe" type="text" placeholder="Descrição do item (opcional)" value="${detalhe.replace(/"/g,'&quot;')}">
+    </div>
+    <button class="btn-remover" onclick="removerItem(this)" title="Remover">✕</button>`;
+  return el;
+}
+
+function adicionarItem(bi) {
+  const wrap = document.querySelector(`.edit-bloco[data-bloco="${bi}"]`);
+  const btnAdd = wrap.querySelector('.btn-add-item');
+  const novoItem = criarEditItem(bi, Date.now(), '', '');
+  wrap.insertBefore(novoItem, btnAdd);
+  novoItem.querySelector('.edit-input-titulo').focus();
+}
+
+function removerItem(btn) {
+  if (document.querySelectorAll(`.edit-bloco[data-bloco="${btn.closest('.edit-item').dataset.bloco}"] .edit-item`).length <= 1) {
+    alert('O bloco precisa ter pelo menos 1 item.'); return;
+  }
+  btn.closest('.edit-item').remove();
+}
+
+function salvarLista() {
+  const listas = getListas();
+  const blocos = listas[adminFuncaoAtual];
+  const container = document.getElementById('edit-container');
+
+  container.querySelectorAll('.edit-bloco').forEach((blocoEl, bi) => {
+    const novosItens = [];
+    blocoEl.querySelectorAll('.edit-item').forEach(itemEl => {
+      const t = itemEl.querySelector('.edit-input-titulo').value.trim();
+      const d = itemEl.querySelector('.edit-input-detalhe').value.trim();
+      if (t) novosItens.push({ t, d });
+    });
+    if (blocos[bi]) blocos[bi].itens = novosItens;
+  });
+
+  listas[adminFuncaoAtual] = blocos;
+  salvar('bo_listas', listas);
+
+  const msg = document.getElementById('lista-salvo');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 2500);
+}
+
+function ir(id) {
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+  document.getElementById(id).classList.add('ativa');
+}
+
+// ══ INIT ══
+atualizarTopoNome();
+</script>
+</body>
+</html>
